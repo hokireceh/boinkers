@@ -31,7 +31,7 @@ npm install luxon
 
 | Run with Proxy                   | Run without Proxy   |
 | -------------------------------- | ------------------- |
-| `nano data.txt` `python bot.py` | `bot.py` `data.txt` |
+| `nano data/boinkers.txt` `nano data/proxy.txt` | `boinkers.txt` `proxy.txt` `main.js` |
 
 ## ⚠️ Note
 - Get auth data (`query_id=... /user=...`) in the `Application` tab in DevTools.
