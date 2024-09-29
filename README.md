@@ -28,6 +28,9 @@ npm install
 ```
 npm install luxon
 ```
+```
+node main.js
+```
 
 | Run with Proxy                   | Run without Proxy   |
 | -------------------------------- | ------------------- |
