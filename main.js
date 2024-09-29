@@ -359,24 +359,24 @@ class Boink {
         try {
             const clickUrl = `https://boink.astronomica.io/api/rewardedActions/rewardedActionClicked/${nameId}?p=android`;
             await axios.post(clickUrl, {}, { headers, httpsAgent });
-            this.log(`Đã click misi quảng cáo ${nameId}`, 'success');
+            this.log(`Salah ngeklik iklan ${nameId}`, 'success');
     
             await new Promise(resolve => setTimeout(resolve, 2000));
     
             const adWatchedUrl = "https://boink.astronomica.io/api/rewardedActions/ad-watched?p=android";
             await axios.post(adWatchedUrl, { providerId }, { headers, httpsAgent });
-            this.log(`Đã xác nhận xem quảng cáo cho ${nameId}`, 'success');
+            this.log(`Ndeleng iklan dikonfirmasi kanggo ${nameId}`, 'success');
     
             await new Promise(resolve => setTimeout(resolve, 2000));
     
             const claimUrl = `https://boink.astronomica.io/api/rewardedActions/claimRewardedAction/${nameId}?p=android`;
-            this.log(`Gửi yêu cầu nhận thưởng cho misi quảng cáo ${nameId}...`, 'info');
+            this.log(`Kirim panjalukan ganjaran kanggo misi iklan ${nameId}...`, 'info');
             const claimResponse = await axios.post(claimUrl, {}, { headers, httpsAgent });
             
             if (claimResponse.status === 200) {
                 const result = claimResponse.data;
                 const reward = result.prizeGotten;
-                this.log(`Misi lengkap quảng cáo ${nameId} sukses | Penghargaan: ${reward}`, 'success');
+                this.log(`Iklan misi lengkap ${nameId} sukses | Penghargaan: ${reward}`, 'success');
             } else {
                 this.log(`Ora bisa nampa ganjaran misi quảng cáo ${nameId}. Status wa: ${claimResponse.status}`, 'error');
             }
