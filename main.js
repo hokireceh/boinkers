@@ -378,7 +378,7 @@ class Boink {
                 const reward = result.prizeGotten;
                 this.log(`Iklan misi lengkap ${nameId} sukses | Penghargaan: ${reward}`, 'success');
             } else {
-                this.log(`Ora bisa nampa ganjaran misi quảng cáo ${nameId}. Status wa: ${claimResponse.status}`, 'error');
+                this.log(`Ora bisa nampa ganjaran misi Iklan${nameId}. Status wa: ${claimResponse.status}`, 'error');
             }
         } catch (error) {
             this.log(`Kesalahan nalika ngolah misi iklan ${nameId}: Wektu nunggu isih kasedhiya!`, 'error');
