@@ -4,7 +4,6 @@ const axios = require('axios');
 const colors = require('colors');
 const readline = require('readline');
 const { DateTime } = require('luxon');
-const { HttpsProxyAgent } = require('https-proxy-agent');
 
 class Boink {
     constructor() {
@@ -23,24 +22,6 @@ class Boink {
             "Sec-Fetch-Site": "same-origin",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
         };
-        this.proxies = this.loadProxies();
-        this.currentProxyIndex = 0;
-    }
-
-    loadProxies() {
-        try {
-            return fs.readFileSync('./../data/proxy.txt', 'utf8').split('\n').filter(Boolean);
-        } catch (error) {
-            this.log('Ora bisa maca file proxy.txt', 'error');
-            return [];
-        }
-    }
-
-    getNextProxy() {
-        if (this.proxies.length === 0) return null;
-        const proxy = this.proxies[this.currentProxyIndex];
-        this.currentProxyIndex = (this.currentProxyIndex + 1) % this.proxies.length;
-        return proxy;
     }
 
     log(msg, type = 'info') {
@@ -72,16 +53,11 @@ class Boink {
         this.log('', 'info');
     }
 
-    async loginByTelegram(initDataString, proxy) {
+    async loginByTelegram(initDataString) {
         const url = "https://boink.astronomica.io/public/users/loginByTelegram?p=android";
         const payload = { initDataString };
-        const httpsAgent = proxy ? new HttpsProxyAgent(proxy) : null;
-        
         try {
-            const response = await axios.post(url, payload, { 
-                headers: this.headers,
-                httpsAgent: httpsAgent
-            });
+            const response = await axios.post(url, payload, { headers: this.headers });
             if (response.status === 200) {
                 return { success: true, token: response.data.token };
             } else {
@@ -109,13 +85,11 @@ class Boink {
         return null;
     }
 
-    async getUserInfo(token, proxy) {
+    async getUserInfo(token) {
         const url = "https://boink.astronomica.io/api/users/me?p=android";
         const headers = { ...this.headers, "Authorization": token };
-        const httpsAgent = proxy ? new HttpsProxyAgent(proxy) : null;
-        
         try {
-            const response = await axios.get(url, { headers, httpsAgent });
+            const response = await axios.get(url, { headers });
             if (response.status === 200) {
                 return { success: true, data: response.data };
             } else {
@@ -123,6 +97,13 @@ class Boink {
             }
         } catch (error) {
             return { success: false, error: error.message };
+        }
+    }
+
+    async handleFriendActions(token, friendIds) {
+        for (const friendId of friendIds) {
+            await this.claimFriendReward(token, friendId);
+            await this.pushFriendToPlay(token, friendId);
         }
     }
 
@@ -137,14 +118,12 @@ class Boink {
         }
     }
 
-    async upgradeBoinker(token, proxy) {
+    async upgradeBoinker(token) {
         const url = "https://boink.astronomica.io/api/boinkers/upgradeBoinker?p=android";
         const payload = {};
         const headers = { ...this.headers, "Authorization": token };
-        const httpsAgent = proxy ? new HttpsProxyAgent(proxy) : null;
-        
         try {
-            const response = await axios.post(url, payload, { headers, httpsAgent });
+            const response = await axios.post(url, payload, { headers });
             if (response.status === 200 && response.data) {
                 const { newSoftCurrencyAmount, newSlotMachineEnergy, rank } = response.data;
                 this.log(`Upgrade sukses, Coin: ${newSoftCurrencyAmount} | Spin: ${newSlotMachineEnergy} | Rank: ${rank}`, 'success');
@@ -159,17 +138,15 @@ class Boink {
         }
     }
 
-    async claimBooster(token, spin, proxy) {
+
+    async claimBooster(token, spin) {
         const payload = spin > 30 
         ? { multiplier: 2, optionNumber: 3 } 
         : { multiplier: 2, optionNumber: 1 };
     
-        const httpsAgent = proxy ? new HttpsProxyAgent(proxy) : null;
-        
         try {
             const response = await axios.post("https://boink.astronomica.io/api/boinkers/addShitBooster?p=android", payload, {
                 headers: { ...this.headers, "Authorization": token },
-                httpsAgent: httpsAgent
             });
             if (response.status === 200) {
                 const result = response.data;
@@ -195,15 +172,15 @@ class Boink {
                 return { success: false, error: 'API error' };
             }
         } catch (error) {
+            console.log(error);
             this.log(`Kesalahan ngirim panjalukan kanggo tuku boosts: ${error.message}`, 'error');
             return { success: false, error: error.message };
         }
     }
 
-    async spinSlotMachine(token, spins, proxy) {
+    async spinSlotMachine(token, spins) {
         const spinAmounts = [150, 50, 25, 10, 5, 1];
         let remainingSpins = spins;
-        const httpsAgent = proxy ? new HttpsProxyAgent(proxy) : null;
         
         while (remainingSpins > 0) {
             let spinAmount = spinAmounts.find(amount => amount <= remainingSpins) || 1;
@@ -212,7 +189,7 @@ class Boink {
             const headers = { ...this.headers, "Authorization": token };
             
             try {
-                const response = await axios.post(url, {}, { headers, httpsAgent });
+                const response = await axios.post(url, {}, { headers });
                 if (response.status === 200) {
                     const result = response.data;
                     this.log(`Spin kasil (${result.outcome}): Coin: ${result.newSoftCurrencyAmount.toString().white}${` | Shit: `.magenta}${result.newCryptoCurrencyAmount.toFixed(2).white}`.magenta, 'custom');
@@ -230,11 +207,10 @@ class Boink {
         }
     }
 
-    async performRewardedActions(token, proxy) {
+    async performRewardedActions(token) {
         const getRewardedActionListUrl = "https://boink.astronomica.io/api/rewardedActions/getRewardedActionList?p=android";
         const getUserInfoUrl = "https://boink.astronomica.io/api/users/me?p=android";
         const headers = { ...this.headers, "Authorization": token };
-        const httpsAgent = proxy ? new HttpsProxyAgent(proxy) : null;
     
         const skippedTasks = [
             'twitterQuotePost20',
@@ -249,7 +225,7 @@ class Boink {
         ];
     
         try {
-            const userInfoResponse = await axios.get(getUserInfoUrl, { headers, httpsAgent });
+            const userInfoResponse = await axios.get(getUserInfoUrl, { headers });
             if (userInfoResponse.status !== 200) {
                 this.log(`Ora bisa entuk informasi pangguna. Kode status: ${userInfoResponse.status}`, 'error');
                 return;
@@ -257,7 +233,7 @@ class Boink {
             const userInfo = userInfoResponse.data;
     
             this.log("Njupuk dhaptar tugas...", 'info');
-            const response = await axios.get(getRewardedActionListUrl, { headers, httpsAgent });
+            const response = await axios.get(getRewardedActionListUrl, { headers });
             if (response.status !== 200) {
                 this.log(`Ora bisa entuk dhaptar tugas. Kode status: ${response.status}`, 'error');
                 return;
@@ -310,11 +286,11 @@ class Boink {
     
                 if (nameId === 'SeveralHourlsRewardedAdTask' || nameId === 'SeveralHourlsRewardedAdTask2') {
                     const providerId = nameId === 'SeveralHourlsRewardedAdTask' ? 'adsgram' : 'onclicka';
-                    await this.handleAdTask(token, nameId, providerId, proxy);
+                    await this.handleAdTask(token, nameId, providerId);
                 } else {
                     const clickUrl = `https://boink.astronomica.io/api/rewardedActions/rewardedActionClicked/${nameId}?p=android`;
                     try {
-                        const clickResponse = await axios.post(clickUrl, {}, { headers, httpsAgent });
+                        const clickResponse = await axios.post(clickUrl, {}, { headers });
                         this.log(`Nggawe misi ${nameId.yellow}. status: ${`pending`.yellow}`);
                     } catch (clickError) {
                         this.log(`Lỗi khi Nggawe misi ${nameId}: ${clickError.message}`, 'error');
@@ -329,7 +305,7 @@ class Boink {
     
                     const claimUrl = `https://boink.astronomica.io/api/rewardedActions/claimRewardedAction/${nameId}?p=android`;
                     try {
-                        const claimResponse = await axios.post(claimUrl, {}, { headers, httpsAgent });
+                        const claimResponse = await axios.post(claimUrl, {}, { headers });
                         if (claimResponse.status === 200) {
                             const result = claimResponse.data;
                             const reward = result.prizeGotten;
@@ -352,26 +328,25 @@ class Boink {
         }
     }
     
-    async handleAdTask(token, nameId, providerId, proxy) {
+    async handleAdTask(token, nameId, providerId) {
         const headers = { ...this.headers, "Authorization": token };
-        const httpsAgent = proxy ? new HttpsProxyAgent(proxy) : null;
     
         try {
             const clickUrl = `https://boink.astronomica.io/api/rewardedActions/rewardedActionClicked/${nameId}?p=android`;
-            await axios.post(clickUrl, {}, { headers, httpsAgent });
+            await axios.post(clickUrl, {}, { headers });
             this.log(`Salah ngeklik iklan ${nameId}`, 'success');
     
             await new Promise(resolve => setTimeout(resolve, 2000));
     
             const adWatchedUrl = "https://boink.astronomica.io/api/rewardedActions/ad-watched?p=android";
-            await axios.post(adWatchedUrl, { providerId }, { headers, httpsAgent });
+            await axios.post(adWatchedUrl, { providerId }, { headers });
             this.log(`Ndeleng iklan dikonfirmasi kanggo ${nameId}`, 'success');
     
             await new Promise(resolve => setTimeout(resolve, 2000));
     
             const claimUrl = `https://boink.astronomica.io/api/rewardedActions/claimRewardedAction/${nameId}?p=android`;
             this.log(`Kirim panjalukan ganjaran kanggo misi iklan ${nameId}...`, 'info');
-            const claimResponse = await axios.post(claimUrl, {}, { headers, httpsAgent });
+            const claimResponse = await axios.post(claimUrl, {}, { headers });
             
             if (claimResponse.status === 200) {
                 const result = claimResponse.data;
@@ -382,38 +357,6 @@ class Boink {
             }
         } catch (error) {
             this.log(`Kesalahan nalika ngolah misi iklan ${nameId}: Wektu nunggu isih kasedhiya!`, 'error');
-        }
-    }
-
-    async checkProxyIP(proxy) {
-        try {
-            const proxyAgent = new HttpsProxyAgent(proxy);
-            const response = await axios.get('https://api.ipify.org?format=json', {
-                httpsAgent: proxyAgent,
-                timeout: 10000 
-            });
-            if (response.status === 200) {
-                return response.data.ip;
-            } else {
-                throw new Error(`Ora bisa mriksa IP proxy. Kode status: ${response.status}`);
-            }
-        } catch (error) {
-            throw new Error(`Kesalahan nalika mriksa IP proxy: ${error.message}`);
-        }
-    }
-
-    formatProxy(proxy) {
-        // from ip:port:user:pass to http://user:pass@ip:port
-        // if http format, just keep it
-        if (proxy.startsWith('http')) {
-            return proxy;
-        }
-
-        const parts = proxy.split(':');
-        if (parts.length === 4) {
-            return `http://${parts[2]}:${parts[3]}@${parts[0]}:${parts[1]}`
-        } else {
-            return `http://${parts[0]}:${parts[1]}`;
         }
     }
 
@@ -428,21 +371,8 @@ class Boink {
             for (let i = 0; i < data.length; i++) {
                 const initDataString = data[i];
                 const firstName = this.extractFirstName(initDataString);
-                const proxy = this.formatProxy(this.getNextProxy());
 
-                let proxyIP = 'Unknown';
-                if (proxy) {
-                    try {
-                        proxyIP = await this.checkProxyIP(proxy);
-                    } catch (error) {
-                        this.log(`Ora bisa mriksa IP proxy: ${error.message}`, 'warning');
-                        continue;
-                    }
-                } else {
-                    this.log('Ora ana proxy sing kasedhiya', 'warning');
-                }
-
-                console.log(`========== Akun ${i+1}/${data.length}  | ${firstName.green} | ip: ${proxyIP} ==========`);
+                console.log(`========== Akun ${i + 1}/${data.length} | ${firstName.green} ==========`);
                 
                 const parsedData = JSON.parse(decodeURIComponent(initDataString.split('user=')[1].split('&')[0]));
                 const userId = parsedData.id;
@@ -450,7 +380,7 @@ class Boink {
                 let token = this.getToken(userId);
                 if (!token) {
                     this.log(`Ora ana token sing ditemokake kanggo Akun ${userId}, mlebu...`, 'warning');
-                    const loginResult = await this.loginByTelegram(initDataString, proxy);
+                    const loginResult = await this.loginByTelegram(initDataString);
                     if (loginResult.success) {
                         this.log('Log in sukses!', 'success');
                         token = loginResult.token;
@@ -464,7 +394,7 @@ class Boink {
                 }
 
                 try {
-                    const userInfoResult = await this.getUserInfo(token, proxy);
+                    const userInfoResult = await this.getUserInfo(token);
                     if (userInfoResult.success) {
                         const userInfo = userInfoResult.data;
                         this.log(`Level: ${userInfo.boinkers.currentBoinkerProgression.level}`, 'info');
@@ -480,7 +410,7 @@ class Boink {
                             : null;
                         
                         if (!lastClaimedTime || currentTime > lastClaimedTime.plus({ hours: 2, minutes: 5 })) {
-                            const boosterResult = await this.claimBooster(token, userInfo.gamesEnergy.slotMachine.energy, proxy);
+                            const boosterResult = await this.claimBooster(token, userInfo.gamesEnergy.slotMachine.energy);
                             if (!boosterResult.success) {
                                 this.log(`Ora bisa njaluk booster: ${boosterResult.error}`, 'error');
                             }
@@ -489,21 +419,21 @@ class Boink {
                             this.log(`Wektu kanggo tuku boosts sabanjuré: ${nextBoosterTime.toLocaleString(DateTime.DATETIME_MED)}`, 'info');
                         }
 
-                        const spinuser = await this.getUserInfo(token, proxy);
+                        const spinuser = await this.getUserInfo(token);
                         const spinUser = spinuser.data;
                         const spins = spinUser.gamesEnergy.slotMachine.energy;
                         if (spins > 0) {
                             this.log(`Miwiti syuting karo ${spins} giliran`, 'yellow');
-                            await this.spinSlotMachine(token, spins, proxy);
+                            await this.spinSlotMachine(token, spins);
                         } else {
                             this.log('Ora ana giliran', 'warning');
                         }
 
-                        await this.performRewardedActions(token, proxy);
+                        await this.performRewardedActions(token);
 
                         let upgradeSuccess = true;
                         while (upgradeSuccess) {
-                            const upgradeResult = await this.upgradeBoinker(token, proxy);
+                            const upgradeResult = await this.upgradeBoinker(token);
                             upgradeSuccess = upgradeResult.success;
                         }
                     } else {
