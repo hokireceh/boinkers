@@ -1,6 +1,6 @@
 # AUTO CLAIM FOR BOINKERS
 
-🔗 **KLIK TO GET USER/QUERY**: [BLUM](https://t.me/garapanairdrop_indonesia)
+🔗 **KLIK TO GET USER/QUERY**: [BOINKERS](https://t.me/garapanairdrop_indonesia)
 
 ## 📢 Telegram Group
 
