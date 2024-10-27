@@ -64,12 +64,18 @@ class Boink {
     }
 
     async countdown(seconds) {
+        const message = 'Join : @garapanairdrop_indonesia %d';
+        
         for (let i = seconds; i >= 0; i--) {
-            readline.cursorTo(process.stdout, 0);
-            process.stdout.write(`===== Kabeh akun rampung, ngenteni ${i} detik kanggo nerusake daur ulang =====`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const loadingAnimation = ['|', '/', '-', '\\'];
+            const animationIndex = (seconds - i) % loadingAnimation.length; // Mengubah karakter animasi
+    
+            readline.cursorTo(process.stdout, 0); // Mengatur posisi kursor
+            process.stdout.write(message.replace('%d', i) + ' ' + loadingAnimation[animationIndex]); // Menampilkan pesan dengan detik yang diperbarui
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Menunggu 1 detik
         }
-        this.log('', 'info');
+    
+        console.log('\nProses rampung, nerusake...'); // Pesan setelah countdown
     }
 
     async loginByTelegram(initDataString, proxy) {
