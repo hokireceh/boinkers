@@ -34,7 +34,7 @@ node main.js
 
 | Run with Vps                   | Run without Vps   |
 | -------------------------------- | ------------------- |
-| `nano data.txt` `nano proxy.txt` | `data.txt` `proxy.txt` `main.js` |
+| `nano data.txt` | `main.js` |
 
 ## ⚠️ Note
 - Get auth data (`query_id=... /user=...`) in the `Application` tab in DevTools.
