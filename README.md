@@ -32,9 +32,9 @@ npm install luxon
 node main.js
 ```
 
-| Run with Proxy                   | Run without Proxy   |
+| Run with Vps                   | Run without Vps   |
 | -------------------------------- | ------------------- |
-| `nano data/boinkers.txt` `nano data/proxy.txt` | `boinkers.txt` `proxy.txt` `main.js` |
+| `nano data.txt` `nano proxy.txt` | `data.txt` `proxy.txt` `main.js` |
 
 ## ⚠️ Note
 - Get auth data (`query_id=... /user=...`) in the `Application` tab in DevTools.
