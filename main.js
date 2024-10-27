@@ -45,12 +45,18 @@ class Boink {
     }
 
     async countdown(seconds) {
+        const message = 'Join : @garapanairdrop_indonesia %d';
+        
         for (let i = seconds; i >= 0; i--) {
-            readline.cursorTo(process.stdout, 0);
-            process.stdout.write(`===== Kabeh akun rampung, ngenteni ${i} detik kanggo nerusake daur ulang =====`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const loadingAnimation = ['|', '/', '-', '\\'];
+            const animationIndex = (seconds - i) % loadingAnimation.length; // Mengubah karakter animasi
+    
+            readline.cursorTo(process.stdout, 0); // Mengatur posisi kursor
+            process.stdout.write(message.replace('%d', i) + ' ' + loadingAnimation[animationIndex]); // Menampilkan pesan dengan detik yang diperbarui
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Menunggu 1 detik
         }
-        this.log('', 'info');
+    
+        console.log('\nProses rampung, nerusake...'); // Pesan setelah countdown
     }
 
     async loginByTelegram(initDataString) {
@@ -113,7 +119,7 @@ class Boink {
             const userData = JSON.parse(decodedData);
             return userData.first_name;
         } catch (error) {
-            this.log("Kesalahan ora bisa njupuk first_name: " + error.message, 'error');
+            this.log("Kesalahan ora njupuk first_name: " + error.message, 'error');
             return "Unknown";
         }
     }
@@ -129,7 +135,7 @@ class Boink {
                 this.log(`Upgrade sukses, Coin: ${newSoftCurrencyAmount} | Spin: ${newSlotMachineEnergy} | Rank: ${rank}`, 'success');
                 return { success: true };
             } else {
-                this.log(`Nganyarke gagal! Kode status: ${response.status}`, 'error');
+                this.log(`Nganyarke gagal!  Kode status: ${response.status}`, 'error');
                 return { success: false };
             }
         } catch (error) {
@@ -158,10 +164,10 @@ class Boink {
                     nextBoosterTime = nextBoosterTime.plus({ hours: 2, minutes: 5 });
                 }
     
-                this.log(`Tuku boosts sukses! duwit receh: ${result.userPostBooster.newCryptoCurrencyAmount || 0}`, 'success');
+                this.log(`Tuku boosts sukses!  dhuwit recehan: ${result.userPostBooster.newCryptoCurrencyAmount || 0}`, 'success');
                 this.log(`Rank: ${result.userPostBooster.rank}`, 'info');
                 if (nextBoosterTime) {
-                    this.log(`Tuku boosts sabanjuré: ${nextBoosterTime.toLocaleString(DateTime.DATETIME_MED)}`, 'info');
+                    this.log(`Tuku dorongan sabanjure ing: ${nextBoosterTime.toLocaleString(DateTime.DATETIME_MED)}`, 'info');
                 } else {
                     this.log(`Ora bisa nemtokake nalika tuku boosts sabanjuré.`, 'warning');
                 }
@@ -173,7 +179,7 @@ class Boink {
             }
         } catch (error) {
             console.log(error);
-            this.log(`Kesalahan ngirim panjalukan kanggo tuku boosts: ${error.message}`, 'error');
+            this.log(`Kesalahan nalika ngirim panjalukan kanggo tuku boosts: ${error.message}`, 'error');
             return { success: false, error: error.message };
         }
     }
@@ -227,7 +233,7 @@ class Boink {
         try {
             const userInfoResponse = await axios.get(getUserInfoUrl, { headers });
             if (userInfoResponse.status !== 200) {
-                this.log(`Ora bisa entuk informasi pangguna. Kode status: ${userInfoResponse.status}`, 'error');
+                this.log(`Ora bisa entuk informasi pangguna.  Kode status: ${userInfoResponse.status}`, 'error');
                 return;
             }
             const userInfo = userInfoResponse.data;
@@ -235,18 +241,18 @@ class Boink {
             this.log("Njupuk dhaptar tugas...", 'info');
             const response = await axios.get(getRewardedActionListUrl, { headers });
             if (response.status !== 200) {
-                this.log(`Ora bisa entuk dhaptar tugas. Kode status: ${response.status}`, 'error');
+                this.log(`Ora bisa entuk dhaptar tugas.  Kode status: ${response.status}`, 'error');
                 return;
             }
     
             const rewardedActions = response.data;
-            this.log(`Ngerti ${rewardedActions.length} misi`, 'success');
+            this.log(`Misi ${rewardedActions.length} ditampa`, 'success');
     
             for (const action of rewardedActions) {
                 const nameId = action.nameId;
                 
                 if (skippedTasks.includes(nameId)) {
-                    this.log(`Skip misi: ${nameId}`, 'warning');
+                    this.log(`Skip quest: ${nameId}`, 'warning');
                     continue;
                 }
     
@@ -277,9 +283,9 @@ class Boink {
                 if (!canPerformTask) {
                     if (waitTime) {
                         const waitMinutes = Math.ceil((waitTime - currentTime) / (60 * 1000));
-                        this.log(`Perlu ngenteni ${waitMinutes} menit kanggo terus nggawe misi ${nameId}`, 'info');
+                        this.log(`Perlu ngenteni ${waitMinutes} sawetara menit kanggo terus nindakake tugas ${nameId}`, 'info');
                     } else {
-                        this.log(`misi ${nameId} wis rampung sadurunge`, 'info');
+                        this.log(`Misi ${nameId} wis rampung sadurunge`, 'info');
                     }
                     continue;
                 }
@@ -291,11 +297,11 @@ class Boink {
                     const clickUrl = `https://boink.astronomica.io/api/rewardedActions/rewardedActionClicked/${nameId}?p=android`;
                     try {
                         const clickResponse = await axios.post(clickUrl, {}, { headers });
-                        this.log(`Nggawe misi ${nameId.yellow}. status: ${`pending`.yellow}`);
+                        this.log(`Nggawe ${nameId.yellow}. status nggoleki: ${`pending`.yellow}`);
                     } catch (clickError) {
-                        this.log(`Lỗi khi Nggawe misi ${nameId}: ${clickError.message}`, 'error');
+                        this.log(`Kesalahan nalika nindakake misi ${nameId}: ${clickError.message}`, 'error');
                         if (clickError.response) {
-                            this.log(`Chi tiết lỗi: ${JSON.stringify(clickError.response.data)}`, 'error');
+                            this.log(`Rincian kesalahan: ${JSON.stringify(clickError.response.data)}`, 'error');
                         }
                         continue;
                     }
@@ -309,21 +315,21 @@ class Boink {
                         if (claimResponse.status === 200) {
                             const result = claimResponse.data;
                             const reward = result.prizeGotten;
-                            this.log(`Misi lengkap ${nameId} sukses | Penghargaan: ${reward}`, 'success');
+                            this.log(`Tugas ${nameId} kasil rampung |  Penghargaan: ${reward}`, 'success');
                         } else {
-                            this.log(`Ora bisa nampa ganjaran ${nameId}. Status wa: ${claimResponse.status}`, 'error');
+                            this.log(`Ora bisa nuntut ganjaran kanggo ${nameId}.  Kode status: ${claimResponse.status}`, 'error');
                         }
                     } catch (claimError) {
-                        this.log(`Kesalahan nalika nampa ganjaran ${nameId}: Wektu nunggu isih kasedhiya!`, 'error');
+                        this.log(`Kasalahan nalika ngaku ganjaran ${nameId}: isih ana wektu ngenteni!`, 'error');
                     }
                 }
     
                 await new Promise(resolve => setTimeout(resolve, 1000));
             }
         } catch (error) {
-            this.log(`Lỗi khi thực hiện các misi: ${error.message}`, 'error');
+            this.log(`Kesalahan nalika nindakake tugas: ${error.message}`, 'error');
             if (error.response) {
-                this.log(`Chi tiết lỗi: ${JSON.stringify(error.response.data)}`, 'error');
+                this.log(`Rincian kesalahan: ${JSON.stringify(error.response.data)}`, 'error');
             }
         }
     }
@@ -334,7 +340,7 @@ class Boink {
         try {
             const clickUrl = `https://boink.astronomica.io/api/rewardedActions/rewardedActionClicked/${nameId}?p=android`;
             await axios.post(clickUrl, {}, { headers });
-            this.log(`Salah ngeklik iklan ${nameId}`, 'success');
+            this.log(`Ngeklik tugas iklan ${nameId}`, 'success');
     
             await new Promise(resolve => setTimeout(resolve, 2000));
     
@@ -345,23 +351,23 @@ class Boink {
             await new Promise(resolve => setTimeout(resolve, 2000));
     
             const claimUrl = `https://boink.astronomica.io/api/rewardedActions/claimRewardedAction/${nameId}?p=android`;
-            this.log(`Kirim panjalukan ganjaran kanggo misi iklan ${nameId}...`, 'info');
+            this.log(`Gửi yêu cầu nhận thưởng cho nhiệm vụ quảng cáo ${nameId}...`, 'info');
             const claimResponse = await axios.post(claimUrl, {}, { headers });
             
             if (claimResponse.status === 200) {
                 const result = claimResponse.data;
                 const reward = result.prizeGotten;
-                this.log(`Iklan misi lengkap ${nameId} sukses | Penghargaan: ${reward}`, 'success');
+                this.log(`tugas iklan ${nameId} kasil rampung |  Penghargaan: ${reward}`, 'success');
             } else {
-                this.log(`Ora bisa nampa ganjaran misi Iklan${nameId}. Status wa: ${claimResponse.status}`, 'error');
+                this.log(`Ora bisa nuntut ganjaran kanggo tugas iklan ${nameId}.  Kode status: ${claimResponse.status}`, 'error');
             }
         } catch (error) {
-            this.log(`Kesalahan nalika ngolah misi iklan ${nameId}: Wektu nunggu isih kasedhiya!`, 'error');
+            this.log(`Kesalahan ngolah tugas iklan ${nameId}: wektu entek tetep!`, 'error');
         }
     }
 
     async main() {
-        const dataFile = path.join(__dirname, './../boinkers/data/boinkers.txt');
+        const dataFile = path.join(__dirname, './../boinkers/data.txt');
         const data = fs.readFileSync(dataFile, 'utf8')
             .replace(/\r/g, '')
             .split('\n')
@@ -379,18 +385,18 @@ class Boink {
 
                 let token = this.getToken(userId);
                 if (!token) {
-                    this.log(`Ora ana token sing ditemokake kanggo Akun ${userId}, mlebu...`, 'warning');
+                    this.log(`Ora ana token sing ditemokake kanggo akun ${userId}, log in...`, 'warning');
                     const loginResult = await this.loginByTelegram(initDataString);
                     if (loginResult.success) {
-                        this.log('Log in sukses!', 'success');
+                        this.log('Manuk e wes mlebu croot!!', 'success');
                         token = loginResult.token;
                         this.saveToken(userId, token);
                     } else {
-                        this.log(`Mlebet gagal! ${loginResult.status || loginResult.error}`, 'error');
+                        this.log(`Manuk e raiso mlebu! ${loginResult.status || loginResult.error}`, 'error');
                         continue; 
                     }
                 } else {
-                    this.log(`Token kasedhiya kanggo Akun ${userId}.`, 'success');
+                    this.log(`Token kasedhiya kanggo akun ${userId}.`, 'success');
                 }
 
                 try {
@@ -416,17 +422,17 @@ class Boink {
                             }
                         } else {
                             const nextBoosterTime = lastClaimedTime.plus({ hours: 2, minutes: 5 });
-                            this.log(`Wektu kanggo tuku boosts sabanjuré: ${nextBoosterTime.toLocaleString(DateTime.DATETIME_MED)}`, 'info');
+                            this.log(`Sabanjure kanggo tuku boosts: ${nextBoosterTime.toLocaleString(DateTime.DATETIME_MED)}`, 'info');
                         }
 
                         const spinuser = await this.getUserInfo(token);
                         const spinUser = spinuser.data;
                         const spins = spinUser.gamesEnergy.slotMachine.energy;
                         if (spins > 0) {
-                            this.log(`Miwiti syuting karo ${spins} giliran`, 'yellow');
+                            this.log(`Miwiti muter karo ${spins} spin`, 'yellow');
                             await this.spinSlotMachine(token, spins);
                         } else {
-                            this.log('Ora ana giliran', 'warning');
+                            this.log('Ora muter', 'warning');
                         }
 
                         await this.performRewardedActions(token);
@@ -437,10 +443,10 @@ class Boink {
                             upgradeSuccess = upgradeResult.success;
                         }
                     } else {
-                        this.log(`Ora bisa entuk informasi pangguna! Status wa: ${userInfoResult.status || userInfoResult.error}`, 'error');
+                        this.log(`Ora bisa entuk informasi pangguna!  Kode status: ${userInfoResult.status || userInfoResult.error}`, 'error');
                     }
                 } catch (error) {
-                    this.log(`Kesalahan nalika ngolah Akun: ${error.message}`, 'error');
+                    this.log(`Kesalahan ngolah akun: ${error.message}`, 'error');
                 }
 
                 await new Promise(resolve => setTimeout(resolve, 1000));
