@@ -1,6 +1,6 @@
 # AUTO CLAIM FOR BOINKERS
 
-🔗 **KLIK TO GET USER/QUERY**: [BOINKERS](https://t.me/garapanairdrop_indonesia)
+🔗 **KLIK TO GET USER/QUERY**: [BOINKERS](https://t.me/boinker_bot/boinkapp?startapp=boink1170158500)
 
 ## 📢 Telegram Group
 
@@ -23,10 +23,7 @@ git clone https://github.com/hokireceh/boinkers.git
 cd boinkers
 ```
 ```
-npm install
-```
-```
-npm install luxon
+npm i user-agents cloudscraper axios colors p-limit https-proxy-agent socks-proxy-agent crypto ws
 ```
 ```
 node main.js
@@ -34,7 +31,7 @@ node main.js
 
 | Run with Vps                   | Run without Vps   |
 | -------------------------------- | ------------------- |
-| `nano data.txt` | `main.js` |
+| `data.txt` | `main.js` | `proxy.txt` | `config.js` |
 
 ## ⚠️ Note
 - Get auth data (`query_id=... /user=...`) in the `Application` tab in DevTools.
