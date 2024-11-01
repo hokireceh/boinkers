@@ -31,7 +31,7 @@ node main.js
 
 | Run with Vps                   | Run without Vps   |
 | -------------------------------- | ------------------- |
-| `data.txt` | `main.js` | `proxy.txt` | `config.js` |
+| `data.txt` `main.js` | `proxy.txt` `config.js` |
 
 ## ⚠️ Note
 - Get auth data (`query_id=... /user=...`) in the `Application` tab in DevTools.
